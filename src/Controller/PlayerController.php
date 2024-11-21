@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 #[Route('/api')]
 class PlayerController extends AbstractController
@@ -31,17 +32,17 @@ class PlayerController extends AbstractController
     }
 
     #[Route('/players', methods: ['POST'])]
-    public function display(Player $player): JsonResponse
+    public function add(Request $request): JsonResponse
     {
         $donnees = json_decode($request->getContent(), true);
 
         $player = new Player();
-        $player->setFirstName($donnees['FirstName']);
-        $player->setLastName($donees['LastName']);
+        $player->setFirstName($donnees['firstName']);
+        $player->setLastName($donnees['lastName']);
         
-        if (isset($donnees['team_id'])) {
+        if (isset($donnees['Team'])) {
 
-            $team = $this->em->getRepository(Team::class)->find($donnees['team_id']);
+            $team = $this->em->getRepository(Team::class)->find($donnees['Team']);
             if ($team) {
                 $player->setTeam($team);
             }
@@ -51,6 +52,32 @@ class PlayerController extends AbstractController
         $this->em->flush();
         
         return $this->json($player, 201);
+    }
+
+    #[Route('/players', methods: ['DELETE'])]
+    public function remove(Request $request) {
+        $id = $request->query->get("id");
+        $player = $this->em->getRepository(Player::class)->find($id);
+        $this->em->remove($player);
+        $this->em->flush();
+        
+        return new JsonResponse($this->json(["Reponse"=>"Succès"]), 404, [], true);
+    }
+
+    #[Route('/api/players/{id}/modifier', name: 'players_edit')]
+    public function  editPlayers(int $id, EntityManagerInterface $em): Response {
+
+        $repository = $em->getRepository(Player::class);
+        $player = $repository->find($id);
+
+        $firstName = $request->query->get("firstName");
+        $player->setFirstName($firstName);
+
+        $repository = $em->getRepository(Player::class);
+        $player = $repository->find($id);
+
+        $lastName = $request->query->get("lastName");
+        $player->setLastName($firstName);
     }
 }
 

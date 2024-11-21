@@ -50,4 +50,20 @@ class TeamController extends AbstractController
         $players = $this->em->getRepository(Player::class)->findBy(['team'=> $team]);
         return $this->json($players);
     }
+
+    #[Route('/api/teams/{id}/modifier', name: 'teams_edit')]
+    public function  editTeams(int $id, EntityManagerInterface $em): Response {
+
+        $repository = $em->getRepository(Team::class);
+        $teams = $repository->find($id);
+
+        $Name = $request->query->get("Name");
+        $team->setName($Name);
+
+        $repository = $em->getRepository(Team::class);
+        $team = $repository->find($id);
+
+        $Score = $request->query->get("Score");
+        $team->setScore($Score);
+    }
 }

@@ -20,6 +20,7 @@ class Player
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(["allplayers"])]
     private ?string $lastName = null;
 
     #[ORM\ManyToOne(inversedBy: 'players')]
